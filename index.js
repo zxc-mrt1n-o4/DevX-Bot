@@ -2,14 +2,14 @@
 // Setup: Add admin user IDs in the ADMIN_USER_IDS array
 // Usage: Start the bot with `node index.js` after installing dependencies
 
+
+require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
-const ADMIN_USER_IDS = [
-  // Add Telegram user IDs of admins here, e.g. 123456789
-];
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
 
 const CONTACTS_FILE = path.join(__dirname, 'contacts.json');
 
@@ -30,6 +30,8 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+
+// POST /notify - receive new contact form submission
 app.post('/notify', (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
@@ -43,7 +45,16 @@ app.post('/notify', (req, res) => {
   res.json({ ok: true });
 });
 
-const PORT = process.env.BOT_PORT || 4001;
+// GET /submissions - get all contact form submissions (simple, no auth)
+app.get('/submissions', (req, res) => {
+  let contacts = [];
+  if (fs.existsSync(CONTACTS_FILE)) {
+    contacts = JSON.parse(fs.readFileSync(CONTACTS_FILE, 'utf8'));
+  }
+  res.json({ submissions: contacts });
+});
+
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
   console.log(`Bot server listening on port ${PORT}`);
 });
