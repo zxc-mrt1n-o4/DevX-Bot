@@ -124,9 +124,8 @@ app.listen(PORT, () => {
   if (!TOKEN) {
     console.error('TELEGRAM_BOT_TOKEN is not set. Bot will not work.');
   }
-  if (ADMIN_USER_IDS.length === 0) {
-    console.warn('No ADMIN_USER_IDS set. No one will receive notifications.');
-  }
+  const userCount = getUserIds().length;
+  console.log(`Currently ${userCount} users will receive notifications`);
 });
 
 // Simple /start command for admins
