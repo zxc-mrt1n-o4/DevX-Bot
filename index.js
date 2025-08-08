@@ -15,12 +15,24 @@ if (!TOKEN) {
   process.exit(1);
 }
 
-const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '')
-  .split(',')
-  .map(id => id.trim())
-  .filter(Boolean);
-if (ADMIN_USER_IDS.length === 0) {
-  console.warn('Warning: No ADMIN_USER_IDS set. No one will receive notifications.');
+
+const USERS_FILE = path.join(__dirname, 'users.json');
+function getUserIds() {
+  if (fs.existsSync(USERS_FILE)) {
+    try {
+      return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+function addUserId(id) {
+  const users = getUserIds();
+  if (!users.includes(id)) {
+    users.push(id);
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  }
 }
 
 const CONTACTS_FILE = path.join(__dirname, 'contacts.json');
@@ -88,9 +100,10 @@ app.post('/notify', (req, res) => {
     (budget ? `Budget: ${budget}\n` : '') +
     (timeline ? `Timeline: ${timeline}\n` : '') +
     `Message: ${message}`;
-  ADMIN_USER_IDS.forEach(id => {
+  const userIds = getUserIds();
+  userIds.forEach(id => {
     bot.sendMessage(id, text).catch(e => {
-      console.error(`Failed to send message to admin ${id}:`, e.message);
+      console.error(`Failed to send message to user ${id}:`, e.message);
     });
   });
   res.json({ ok: true });
@@ -118,9 +131,6 @@ app.listen(PORT, () => {
 
 // Simple /start command for admins
 bot.onText(/\/start/, (msg) => {
-  if (ADMIN_USER_IDS.includes(String(msg.from.id))) {
-    bot.sendMessage(msg.chat.id, 'You are registered as an admin. You will receive contact requests.');
-  } else {
-    bot.sendMessage(msg.chat.id, 'You are not authorized to receive contact requests.');
-  }
+  addUserId(String(msg.from.id));
+  bot.sendMessage(msg.chat.id, 'You are now subscribed to contact notifications. You will receive all new contact requests.');
 });
