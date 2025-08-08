@@ -1,13 +1,9 @@
+
 # Railway deployment configuration for DevX Telegram Bot
 # Docs: https://docs.railway.app/deploy/configure/
 
-[env]
-TELEGRAM_BOT_TOKEN
-ADMIN_USER_IDS
-PORT
-
 [build]
-cmd = "npm install"
+	cmd = "npm install"
 
 [start]
-cmd = "npm start"
+	cmd = "npm start"
