@@ -1,0 +1,11 @@
+{
+  "name": "DevX Telegram Bot",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "env": {
+    "TELEGRAM_BOT_TOKEN": "",
+    "ADMIN_USER_IDS": "",
+    "PORT": "4001"
+  }
+}
