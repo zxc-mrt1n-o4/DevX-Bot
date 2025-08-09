@@ -3,7 +3,8 @@
 # Docs: https://docs.railway.app/deploy/configure/
 
 [build]
-	cmd = "npm install"
+  builder = "nixpacks"
+  buildCommand = "echo 'No build required'"
 
 [start]
-	cmd = "npm start"
+  cmd = "npm start"
